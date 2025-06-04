@@ -14,3 +14,4 @@ next/
 .next/cache/
 .next/server/
 .next/static/
+./next

@@ -23,7 +23,7 @@ const LoginPage: React.FC = () => {
 
     if (!/^\S+@\S+\.\S+$/.test(merchantEmail)) {
       setError("Please enter a valid merchant email.");
-      openNotification("Please enter a valid merchant email.", "error");
+      openNotification("Please enter a valid merchant email", "error");
       return;
     }
 
@@ -96,5 +96,4 @@ const LoginPage: React.FC = () => {
     </div>
   );
 };
-
 export default LoginPage;

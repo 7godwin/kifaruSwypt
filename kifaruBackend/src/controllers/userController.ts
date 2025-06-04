@@ -83,7 +83,6 @@ export const AddProduct = async (req: Request, res: Response) => {
   }
 };
 
-
 //...............get Products...........................
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -161,4 +160,17 @@ export const deleteProduct = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "An error occurred while deleting the product." });
     }
 };
+
+
+
+export const savewallet = async (req: Request, res: Response) => {
+
+    try {
+
+        
+        
+    } catch (error) {
+        
+    }
+}
 

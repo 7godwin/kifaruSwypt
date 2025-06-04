@@ -3,7 +3,8 @@
 
 import React, { useEffect,useState} from "react";
 import axios from "axios";
-import jwt_decode from "jwt-decode";
+// import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import {
   Layout,
   Menu,
@@ -26,6 +27,7 @@ import {
 } from "@ant-design/icons";
 
 import WalletSetupModal from "../../utilis/WalletSetupModal"; // Adjust the import path as necessary
+import { log } from "console";
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
@@ -34,13 +36,15 @@ type Product = {
   id: number;
   name: string;
   price: number;
-  stock: number;
+  quantity: number;
   imageUrl: string;
 };
 
 const MerchantDashboard: React.FC = () => {
 const [walletModalVisible, setWalletModalVisible] = useState(false);
 const [savedWalletAddress, setSavedWalletAddress] = useState("");
+const [merchantusername, setMerchantUsername] = useState("User");
+const [merchant_id, setMerchantId] = useState("0 merchant_id");
 
   const [collapsed, setCollapsed] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -48,7 +52,7 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
   const [form, setForm] = useState({
     name: "",
     price: 0,
-    stock: 0,
+    quantity: 0,
     imageFile: null as File | null,
     imagePreview: "",
   });
@@ -62,13 +66,31 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
 };
 
   const resetForm = () => {
-    setForm({ name: "", price: 0, stock: 0, imageFile: null, imagePreview: "" });
+    setForm({ name: "", price: 0, quantity: 0, imageFile: null, imagePreview: "" });
   };
 
   const handleAddClick = () => {
     resetForm();
     setModalVisible(true);
   };
+
+  // axios save products to backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.post("http://localhost:5050/AddProduct");
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        message.error("Failed to load products.");
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -84,7 +106,7 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
   };
 
   const handleStockChange = (value: number | null) => {
-    setForm((prev) => ({ ...prev, stock: value ?? 0 }));
+    setForm((prev) => ({ ...prev, quantity: value ?? 0 }));
   };
 
   const handleImageChange = (info: any) => {
@@ -111,26 +133,93 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
     return isImage && isLt2M;
   };
 
-  const handleOk = () => {
-    const { name, price, stock, imageFile, imagePreview } = form;
-    if (!name.trim() || price <= 0 || stock < 0 || !imageFile) {
-      message.error("Please fill all fields correctly and upload an image.");
-      return;
+const handleOk = async () => {
+  const { name, price, quantity, imageFile } = form;
+
+  const errors = [];
+  if (!name.trim()) errors.push("Product name is required.");
+  if (price <= 0) errors.push("Price must be greater than 0.");
+  if (quantity <= 0) errors.push("Quantity must be greater than 0.");
+  if (!imageFile) errors.push("Product image is required.");
+
+  if (errors.length > 0) {
+    message.error(errors.join(" "));
+    return;
+  }
+
+  try {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY; // Add API key
+
+    if (!cloudName || !uploadPreset || !apiKey) {
+      throw new Error("Cloudinary configuration is missing. Check environment variables.");
     }
 
-    
-    const newProduct: Product = {
-      id: Date.now(),
-      name: name.trim(),
+    // Step 1: Upload to Cloudinary
+    const uploadData = new FormData();
+    uploadData.append("file", imageFile);
+    uploadData.append("upload_preset", uploadPreset);
+    uploadData.append("api_key", apiKey); // Required for unsigned uploads
+
+console.log("Env vars:", {
+  cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+  apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+});
+    const cloudinaryRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: uploadData,
+      }
+    );
+
+    if (!cloudinaryRes.ok) {
+      const errorData = await cloudinaryRes.json();
+      throw new Error(`Cloudinary upload failed: ${errorData.error?.message || cloudinaryRes.statusText}`);
+    }
+
+    const result = await cloudinaryRes.json();
+    const imageUrl = result.secure_url;
+    console.log("Cloudinary response:", result);
+    console.log("Image URL:", imageUrl);
+
+    // Step 2: Send product info with imageUrl to your backend
+    const productPayload = {
+      merchant_id,
+      name,
       price,
-      stock,
-      imageUrl: imagePreview,
+      quantity,
+      imageUrl,
     };
 
-    setProducts((prev) => [...prev, newProduct]);
+    const response = await axios.post("http://localhost:5050/AddProduct", productPayload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    message.success("Product added successfully!");
+    console.log("Server response:", response.data);
+
     setModalVisible(false);
-    resetForm();
-  };
+    setForm({
+      name: "",
+      price: 0,
+      quantity: 0,
+      imageFile: null,
+      imagePreview: "",
+    });
+  } catch (err) {
+    if (err?.response) {
+      message.error(`Server error: ${err.response.data.message || "Unknown error"}`);
+    } else {
+      message.error(`Failed to add product: ${err.message || "Check the network or console."}`);
+    }
+    console.error("POST error:", err);
+  }
+};
 
   const handleDelete = (id: number) => {
     if (confirm("Delete this product?")) {
@@ -159,9 +248,9 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
       render: (price: number) => `$${price.toFixed(2)}`,
     },
     {
-      title: "Stock",
-      dataIndex: "stock",
-      key: "stock",
+      title: "Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
     },
     {
       title: "Actions",
@@ -174,7 +263,6 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
     },
   ];
 
-  const [merchantusername, setMerchantUsername] = useState("User");
 
  useEffect(() => {
     const token = localStorage.getItem("merchantToken");
@@ -182,14 +270,20 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       try {
-        const decoded= jwt_decode(token);
+        const decoded :any= jwtDecode(token);
         const user = decoded.merchantUserName || decoded.merchantusername || decoded.sub || "User";
+        const merchant_id =decoded.merchant_id || decoded.merchant_id || decoded.sub || "Unknown merchant_id";
         setMerchantUsername(user);
+        setMerchantId(merchant_id);
+        console.log("Merchant ID:", merchant_id);
+        console.log("Decoded user:", user);
       } catch (error) {
         console.error("Token decode error:", error);
       }
-  
+    }
   }, []);
+
+  
   return (
     <Layout
       style={{
@@ -250,14 +344,13 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
   }}
 >
   <Title level={4} style={{ color: "white", margin: 30, userSelect: "none" }}>
-    Welcome, { { merchantusername: "John Doe" }.merchantusername }
+    Welcome, {merchantusername}
   </Title>
 
   <button
     onClick={() => {
       localStorage.removeItem("merchantToken");
-      // Add any redirect or state reset logic here after logout
-      window.location.href = "/"; // Example: redirect to login page
+      window.location.href = "/";
     }}
     style={{
       backgroundColor: "transparent",
@@ -412,8 +505,8 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
     <div style={{ display: "flex", flexDirection: "column" }}>
       <label className="block font-semibold mb-2">Stock/Quantity</label>
       <InputNumber
-        placeholder="Enter stock quantity"
-        value={form.stock}
+        placeholder="Enter quantity"
+        value={form.quantity}
         onChange={handleStockChange}
         min={0}
         style={{ width: "100%", height: 44, fontSize: 16 }}
@@ -457,7 +550,7 @@ const [savedWalletAddress, setSavedWalletAddress] = useState("");
     setSavedWalletAddress(address);
     message.success("Wallet saved successfully!");
     setWalletModalVisible(false);
-    console.log("Saved wallet:", address); // You can send this to backend here
+    console.log("Saved wallet:", address); 
   }}
 />
 

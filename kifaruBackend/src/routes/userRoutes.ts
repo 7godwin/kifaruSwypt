@@ -1,6 +1,6 @@
 
 import {Router} from "express";
-import {  AddProduct, deleteProduct, getProducts, signupUser, updateProduct} from "../controllers/userController";
+import {  AddProduct, deleteProduct, getProducts, savewallet, signupUser, updateProduct} from "../controllers/userController";
 import { loginUser } from "../auth/authLogin";
 
 
@@ -17,6 +17,7 @@ router.post('/AddProduct', asyncHandler(AddProduct));
 router.get('/getProducts', asyncHandler(getProducts));
 router.put('/updateProduct/:id', asyncHandler(updateProduct));
 router.delete('/deleteProduct/:id', asyncHandler(deleteProduct));
+router.post('/saveWallet',asyncHandler(savewallet))
 
 export default router;
 
