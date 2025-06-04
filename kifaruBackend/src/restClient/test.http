@@ -1,0 +1,57 @@
+
+
+###Register User
+POST http://localhost:5050/signup
+Content-Type: application/json
+
+{
+  "merchantUserName": "Godwin",
+  "merchantEmail": "wijfred@gmail.com",
+  "password": "atopwudan"
+}
+
+###Login User
+POST http://localhost:5050/auth/login
+Content-Type: application/json
+
+{
+  "merchantEmail": "wijfred@gmail.com",
+  "password": "atopwudan"
+}
+
+
+
+###Add Product
+
+POST http://localhost:5050/AddProduct
+Content-Type: application/json
+
+{ "merchant_id": "bf089f9f-b96e-49f5-817c-67ca17d0b12f",
+  "name": "Kifaru Business Suite",
+  "description": "A powerful tool for managing your business",
+  "imageUrl": "https://example.com/image.jpg",
+  "price": 9080,
+  "category": "Business Tools",
+  "quantity": 10 
+}
+###Get All Products
+GET http://localhost:5050/getProducts
+Content-Type: application/json
+
+
+###Delete Product
+DELETE http://localhost:5050/deleteProduct/0970450a-9ceb-4c96-900a-1477161f8614
+
+
+###Update Product
+PUT http://localhost:5050/updateProduct/d7f981a5-ebf2-475d-9cb3-208dd6e91000
+Content-Type: application/json
+
+{
+  "name": "hello Business Suite",
+  "description": "A powerful tool for managing your business",
+  "imageUrl": "https://example.com/image.jpg",
+  "price": 19080,
+  "category": "Business Tools",
+  "quantity": 500
+}
