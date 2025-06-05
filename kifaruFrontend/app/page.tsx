@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DepositModal } from "swypt-checkout";
 import { ShoppingCart, Instagram, Twitter, Facebook, X, Star, Heart, Sparkles } from "lucide-react";
 import "swypt-checkout/dist/styles.css";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 
 // Type definitions
@@ -12,12 +13,15 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  imageurl: string;
   price: number;
   category: string;
   rating: number;
   bestseller?: boolean;
   new?: boolean;
+  quantity?: number; 
+  walletaddressed?: string; 
+
 }
 
 interface CartItem {
@@ -59,56 +63,57 @@ interface CategoryFilterProps {
 }
 
 
-const beautyProducts: Product[] = [
-  {
-    id: "glow-serum",
-    name: "Radiance Boost Vitamin C Serum",
-    description: "Wake up to brighter skin! This potent serum is like sunshine in a bottle - packed with 20% vitamin C and hyaluronic acid for that dewy, camera-ready glow.",
-    imageUrl: "/beauty-serum.jpg",
-    price: 2850,
-    category: "Skincare",
-    rating: 4.8,
-    bestseller: true
-  },
-  {
-    id: "hydra-moisturizer",
-    name: "Cloud Nine Hydrating Moisturizer",
-    description: "Feels like a cool drink for thirsty skin! Our cult-favorite moisturizer melts in instantly, leaving skin baby-soft and plump for 24 hours straight.",
-    imageUrl: "/moisturizer.jpg",
-    price: 1,
-    category: "Skincare",
-    rating: 4.9
-  },
-  {
-    id: "gentle-cleanser",
-    name: "Bamboo Fresh Daily Cleanser",
-    description: "Cleanse without the squeeze! This creamy, pH-balanced cleanser removes makeup and grime while keeping your skin barrier happy and hydrated.",
-    imageUrl: "/cleanser.jpg",
-    price: 2300,
-    category: "Skincare",
-    rating: 4.6
-  },
-  {
-    id: "velvet-lipstick",
-    name: "Velvet Kiss Liquid Lipstick",
-    description: "One swipe, all-day confidence! This weightless liquid lipstick glides on like silk and stays put through coffee dates, work calls, and everything in between.",
-    imageUrl: "/lipstick.jpg",
-    price: 1950,
-    category: "Makeup",
-    rating: 4.7,
-    new: true
-  },
-  {
-    id: "flawless-foundation",
-    name: "Second Skin Foundation",
-    description: "Your skin, but better! This buildable foundation blurs imperfections while looking completely natural - like you woke up with perfect skin.",
-    imageUrl: "/foundation.jpg",
-    price: 3650,
-    category: "Makeup",
-    rating: 4.8,
-    bestseller: true
-  }
-];
+
+// const beautyProducts: Product[] = [
+//   {
+//     id: "glow-serum",
+//     name: "Radiance Boost Vitamin C Serum",
+//     description: "Wake up to brighter skin! This potent serum is like sunshine in a bottle - packed with 20% vitamin C and hyaluronic acid for that dewy, camera-ready glow.",
+//     imageUrl: "/beauty-serum.jpg",
+//     price: 2850,
+//     category: "Skincare",
+//     rating: 4.8,
+//     bestseller: true
+//   },
+//   {
+//     id: "hydra-moisturizer",
+//     name: "Cloud Nine Hydrating Moisturizer",
+//     description: "Feels like a cool drink for thirsty skin! Our cult-favorite moisturizer melts in instantly, leaving skin baby-soft and plump for 24 hours straight.",
+//     imageUrl: "/moisturizer.jpg",
+//     price: 1,
+//     category: "Skincare",
+//     rating: 4.9
+//   },
+//   {
+//     id: "gentle-cleanser",
+//     name: "Bamboo Fresh Daily Cleanser",
+//     description: "Cleanse without the squeeze! This creamy, pH-balanced cleanser removes makeup and grime while keeping your skin barrier happy and hydrated.",
+//     imageUrl: "/cleanser.jpg",
+//     price: 2300,
+//     category: "Skincare",
+//     rating: 4.6
+//   },
+//   {
+//     id: "velvet-lipstick",
+//     name: "Velvet Kiss Liquid Lipstick",
+//     description: "One swipe, all-day confidence! This weightless liquid lipstick glides on like silk and stays put through coffee dates, work calls, and everything in between.",
+//     imageUrl: "/lipstick.jpg",
+//     price: 1950,
+//     category: "Makeup",
+//     rating: 4.7,
+//     new: true
+//   },
+//   {
+//     id: "flawless-foundation",
+//     name: "Second Skin Foundation",
+//     description: "Your skin, but better! This buildable foundation blurs imperfections while looking completely natural - like you woke up with perfect skin.",
+//     imageUrl: "/foundation.jpg",
+//     price: 3650,
+//     category: "Makeup",
+//     rating: 4.8,
+//     bestseller: true
+//   }
+// ];
 
 const CartPanel: React.FC<CartPanelProps> = ({
   isOpen,
@@ -167,7 +172,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       <div className="flex items-start gap-3">
                         <div className="relative">
                           <img
-                            src={item.product.imageUrl}
+                            src={item.product.imageurl}
                             alt={item.product.name}
                             className="w-16 h-16 object-cover rounded-lg shadow-sm"
                           />
@@ -343,7 +348,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, isSelected 
   >
     <div className="relative overflow-hidden rounded-2xl mb-5">
       <img
-        src={product.imageUrl}
+        src={product.imageurl}
         alt={product.name}
         className="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110"
       />
@@ -492,8 +497,25 @@ const Footer: React.FC = () => (
 );
 
 const KifaruBeautyStore: React.FC = () => {
-   const router = useRouter(); 
-  
+  const router = useRouter();
+
+const [products, setProducts] = useState<Product[]>([]);
+
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://localhost:5050/getProducts");
+      setProducts(response.data.message);
+      console.log("Products fetched:", response.data);
+      const merchantAddress = response.data.message[0].walletaddressed;
+      console.log("Merchant Address:", merchantAddress);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  fetchProducts();
+}, []);
 
   const navigateToDashboard = () => {
   console.log("Navigating to /merchants");
@@ -505,13 +527,14 @@ const KifaruBeautyStore: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  const merchantAddress: string = "0x21255cdbdAfF23D27bE0E00E79b8b03a14A32ab1";
-
-  const categories: string[] = Array.from(new Set(beautyProducts.map((product: Product) => product.category)));
+  // const merchantAddress: string = "0x21255cdbdAfF23D27bE0E00E79b8b03a14A32ab1";
+    const merchantAddress: string = products.length > 0 ? products[0].walletaddressed: null;
+  console.log("Merchanteeezz Address:", merchantAddress);
+  const categories: string[] = Array.from(new Set(products.map((product: Product) => product.category)));
 
   const filteredProducts: Product[] = selectedCategory === "All" 
-    ? beautyProducts 
-    : beautyProducts.filter((product: Product) => product.category === selectedCategory);
+    ? products 
+    : products.filter((product: Product) => product.category === selectedCategory);
 
   const handleProductSelect = (product: Product): void => {
     setCartItems((prevItems: CartItem[]) => {

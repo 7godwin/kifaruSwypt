@@ -1,25 +1,44 @@
 import React, { useState } from "react";
 import { Modal, Button, Input, Typography, message, Divider } from "antd";
 import { isAddress } from "ethers";
+import axios from "axios";
 
 const { Text, Title } = Typography;
 
-const WalletSetupModal = ({ visible, onClose, onSubmit }) => {
-  const [walletAddress, setWalletAddress] = useState("");
+const WalletSetupModal = ({ visible, onClose, onSubmit, merchant_id }) => {
+  const [wallet_address, setWalletAddress] = useState("");
 
-  const handleSave = () => {
-    if (!isAddress(walletAddress)) {
+  const handleSave = async () => {
+    if (!isAddress(wallet_address)) {
       message.error("Please enter a valid Ethereum wallet address");
       return;
     }
-    onSubmit(walletAddress);
-    setWalletAddress("");
+
+    if (!merchant_id) {
+      message.error("Merchant ID is missing");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:5050/savewallet", {
+        wallet_address,
+        merchant_id,
+      });
+
+      message.success("Wallet saved successfully");
+      onSubmit(wallet_address);
+      setWalletAddress("");
+      onClose();
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Failed to save wallet";
+      message.error(errorMsg);
+    }
   };
 
   return (
     <Modal
       title={<Title level={4} className="font-bold text-gray-800 mb-0">Wallet Setup</Title>}
-      visible={visible}
+      open={visible}
       onCancel={() => {
         setWalletAddress("");
         onClose();
@@ -46,12 +65,16 @@ const WalletSetupModal = ({ visible, onClose, onSubmit }) => {
       ]}
       centered
       width={480}
-      bodyStyle={{ padding: "24px 32px" }}
       className="rounded-xl overflow-hidden shadow-lg"
-      maskStyle={{
-        backdropFilter: "blur(6px)",
-        backgroundColor: "rgba(0,0,0,0.45)",
-      }}
+      styles={{
+    body: {
+      padding: "24px 32px", // replaces `bodyStyle`
+    },
+    mask: {
+      backdropFilter: "blur(6px)",
+      backgroundColor: "rgba(0,0,0,0.45)",
+    },
+  }}
     >
       <div className="text-center mb-6">
         <Button
@@ -70,7 +93,7 @@ const WalletSetupModal = ({ visible, onClose, onSubmit }) => {
 
       <Input
         placeholder="0x..."
-        value={walletAddress}
+        value={wallet_address}
         onChange={(e) => setWalletAddress(e.target.value.trim())}
         size="large"
         className="rounded-lg h-10 font-mono text-gray-800"

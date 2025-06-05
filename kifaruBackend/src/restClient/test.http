@@ -27,12 +27,12 @@ POST http://localhost:5050/AddProduct
 Content-Type: application/json
 
 { "merchant_id": "bf089f9f-b96e-49f5-817c-67ca17d0b12f",
-  "name": "Kifaru Business Suite",
-  "description": "A powerful tool for managing your business",
-  "imageUrl": "https://example.com/image.jpg",
-  "price": 9080,
-  "category": "Business Tools",
-  "quantity": 10 
+    "name": "Velvet Kiss Liquid Lipstick",
+    "description": "One swipe, all-day confidence! This weightless liquid lipstick glides on like silk and stays put through coffee dates, work calls, and everything in between.",
+    "imageUrl": "https://i.ebayimg.com/images/g/zywAAOSw-o9lSgod/s-l1600.webp",
+    "price": 5,
+    "category": "Business Tools",
+    "quantity": 300
 }
 ###Get All Products
 GET http://localhost:5050/getProducts
@@ -55,3 +55,17 @@ Content-Type: application/json
   "category": "Business Tools",
   "quantity": 500
 }
+
+
+###post wallet
+POST http://localhost:5050/saveWallet
+Content-Type: application/json
+
+{
+  "merchant_id": "bf089f9f-b96e-49f5-817c-67ca17d0b12f",
+  "wallet_address": "0x1234567890abcdef1234567890abcdef12345678"
+}
+
+###Get Wallet by ID
+GET http://localhost:5050/getWallet/2db7a93c-0b57-4cb6-8386-12694fd8d7b2
+

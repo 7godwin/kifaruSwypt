@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { openNotification } from "../../utilis/notification"; 
 import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+
 
 const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +41,15 @@ const LoginPage: React.FC = () => {
         const token = res.data.token;
         if (token) {
           localStorage.setItem("merchantToken", token);
+
+            const decoded :any= jwtDecode(token);
+            const merchant_id =decoded.merchant_id || decoded.merchant_id || decoded.sub || "Unknown merchant_id";
+          localStorage.setItem("merchant_id", merchant_id);
+
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
         }
+        fetchWalletAddressed();
       }
     } catch (err: any) {
       const message = err.response?.data?.error || "Login failed.";
@@ -48,6 +57,27 @@ const LoginPage: React.FC = () => {
       openNotification(message, "error");
     }
   };
+
+   const fetchWalletAddressed = async () => {
+      const token = localStorage.getItem('token'); // Or whatever key you're storing the token under
+
+      const merchant_id = localStorage.getItem('merchant_id')
+  
+      try {
+        const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` // If your API uses auth
+          },
+        });
+        console.log('Fetched address:', response.data.wallet_address);
+        localStorage.setItem('your_wallet_address', response.data.wallet_address);
+      }
+       catch (error) {
+        console.error('Error fetching wallet address:', error);
+      }
+  }
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 relative z-10">

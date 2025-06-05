@@ -3,7 +3,6 @@
 import mssql from 'mssql';
 import { sqlConfig } from '../config/sqlConfig';
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken"
 import { v4 } from 'uuid';
 import bcrypt from 'bcrypt'
 
@@ -67,13 +66,13 @@ export const signupUser = async (req: Request, res: Response) => {
 
 export const AddProduct = async (req: Request, res: Response) => {
   try {
-    const { name,merchant_id,description,imageUrl,price ,category,quantity } = req.body;
+    const { name,merchant_id,description,imageUrl,price ,category,quantity,walletAddressed } = req.body;
     const id = v4();
 
     const data = await sqlConfig.query(
-      `INSERT INTO Products (id, merchant_id, imageUrl, name, description, category, quantity, price)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [id, merchant_id, imageUrl, name, description, category, quantity, price]
+      `INSERT INTO Products (id, merchant_id, imageUrl, name, description, category, quantity, price,walletAddressed)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [id, merchant_id, imageUrl, name, description, category, quantity, price,walletAddressed]
     );
 
     return res.status(200).json({ message:'Product created successfully', rowsAffected: data.rowCount });
@@ -162,15 +161,94 @@ export const deleteProduct = async (req: Request, res: Response) => {
 };
 
 
+// export const savewallet = async (req: Request, res: Response) => {
+//   try {
+//     const { merchant_id, wallet_address } = req.body;
+//     const id = v4();
+
+//     // Validate required fields
+//     if (!merchant_id || !wallet_address) {
+//       return res.status(400).json({ message: "merchant_id and wallet_address are required." });
+//     }
+
+//     // Insert into the wallets table
+//     const query = `
+//       INSERT INTO wallets (id, merchant_id, wallet_address)
+//       VALUES ($1, $2, $3)
+//       RETURNING *;
+//     `;
+
+//     const values = [id, merchant_id, wallet_address];
+//     const result = await sqlConfig.query(query, values);
+
+//     return res.status(201).json({
+//       message: "Wallet saved successfully.",
+//       data: result.rows[0],
+//     });
+
+//   } catch (error) {
+//     console.error("Error saving wallet:", error);
+//     return res.status(500).json({ message: "Internal server error." });
+//   }
+// };
 
 export const savewallet = async (req: Request, res: Response) => {
+  try {
+    const { merchant_id, wallet_address } = req.body;
+    const id = v4();
 
-    try {
-
-        
-        
-    } catch (error) {
-        
+    if (!merchant_id || !wallet_address) {
+      return res.status(400).json({ message: "merchant_id and wallet_address are required." });
     }
-}
+
+    const insertQuery = `
+      INSERT INTO wallets (id, merchant_id, wallet_address)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (wallet_address) DO NOTHING
+      RETURNING *;
+    `;
+    const values = [id, merchant_id, wallet_address];
+    const result = await sqlConfig.query(insertQuery, values);
+
+    if (result.rowCount === 0) {
+      return res.status(409).json({ message: "Wallet address already exists." });
+    }
+
+    return res.status(201).json({
+      message: "Wallet saved successfully.",
+      data: result.rows[0],
+    });
+
+  } catch (error) {
+    console.error("Error saving wallet:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+
+export const getWalletById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  console.log("merchant_id param:", id);
+
+  try {
+    const result = await sqlConfig.query(
+      "SELECT wallet_address FROM wallets WHERE merchant_id = $1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    return res.status(200).json({
+      wallet_address: result.rows[0].wallet_address
+    });
+
+  } catch (error) {
+    console.error("Error fetching wallet:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 

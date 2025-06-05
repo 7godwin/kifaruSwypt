@@ -1,9 +1,8 @@
 
 "use client";
 
-import React, { useEffect,useState} from "react";
+import React, { use, useEffect,useState} from "react";
 import axios from "axios";
-// import jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
 import {
   Layout,
@@ -24,11 +23,11 @@ import {
   UserOutlined,
   DollarOutlined,
   ShopOutlined,
+  CopyOutlined
 } from "@ant-design/icons";
 
 import WalletSetupModal from "../../utilis/WalletSetupModal"; // Adjust the import path as necessary
-import { log } from "console";
-
+import WalletAddressWithCopy from "../../utilis/walletCopy"; // Adjust the import path as necessary
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 
@@ -58,7 +57,37 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
   });
 
 
- const handleMenuClick = (e: any) => {
+  const fetchWalletAddress = async () => {
+    const token = localStorage.getItem('token'); // Or whatever key you're storing the token under
+
+    try {
+      const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` // If your API uses auth
+        },
+      });
+
+      const address = response.data.wallet_address;
+      console.log('Fetched address:', address);
+
+      if (address && address.trim() !== '') {
+        setSavedWalletAddress(address);
+        localStorage.setItem('your_wallet_address', address);
+      } else {
+        message.info('No wallet address found. Please save one first.');
+        handleMenuClick({ key: 'my Wallet' });
+      }
+    } catch (error) {
+      console.error('Error fetching wallet address:', error);
+      message.error('Failed to fetch wallet address.');
+    }
+}
+
+;
+  const handleMenuClick = (e: any) => {
+    console.log('Menu clicked:', e.key);
+
   if (e.key === "my Wallet") {
     setWalletModalVisible(true);
   }
@@ -134,6 +163,14 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
   };
 
 const handleOk = async () => {
+   const walletAddressed = localStorage.getItem("your_wallet_address");
+
+  if (!walletAddressed || walletAddressed.trim() === "") {
+    message.warning("You must save your wallet address before adding a product.");
+     setModalVisible(false)
+      handleMenuClick({ key: 'my Wallet' });
+    return;
+  }
   const { name, price, quantity, imageFile } = form;
 
   const errors = [];
@@ -141,6 +178,7 @@ const handleOk = async () => {
   if (price <= 0) errors.push("Price must be greater than 0.");
   if (quantity <= 0) errors.push("Quantity must be greater than 0.");
   if (!imageFile) errors.push("Product image is required.");
+  if(!walletAddressed) errors.push("Wallet address is required.");
 
   if (errors.length > 0) {
     message.error(errors.join(" "));
@@ -192,6 +230,7 @@ console.log("Env vars:", {
       price,
       quantity,
       imageUrl,
+      walletAddressed
     };
 
     const response = await axios.post("http://localhost:5050/AddProduct", productPayload, {
@@ -283,7 +322,50 @@ console.log("Env vars:", {
     }
   }, []);
 
+  // Handle card clicks
+ const handleCardClick = async (key: string) => {
+  console.log('Menu clicked with key:', key);
   
+  if (key === 'view-wallet') {
+    console.log('Wallet menu clicked');
+
+    try {
+      const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const address = response.data.wallet_address;
+      console.log('Fetched address:', address);
+
+      if (address && address.trim() !== '') {
+        setSavedWalletAddress(address);
+        localStorage.setItem('your_wallet_address', address);
+      } else {
+        message.info('No wallet address found. Please save one first.');
+        handleMenuClick({ key: 'my Wallet' });
+      }
+
+    } catch (error: any) {
+      console.error('Error fetching wallet address:', error);
+
+      // Axios error handling:
+      const status = error.response?.status;
+      const msg = error.response?.data?.message;
+
+      if (status === 404 && msg === 'Wallet not found') {
+        message.info('No wallet address found. Please save one first.');
+        handleMenuClick({ key: 'my Wallet' });
+      } else {
+        message.error('Error fetching wallet address');
+      }
+    }
+  }
+
+  // handle other menu keys if needed
+};
+
+  
+
   return (
     <Layout
       style={{
@@ -339,7 +421,7 @@ console.log("Env vars:", {
     height: 64,
     display: "flex",
     marginBottom: 20,
-    justifyContent: "space-between",  // <-- change this to space-between
+    justifyContent: "space-between",  
     alignItems: "center",
   }}
 >
@@ -350,6 +432,9 @@ console.log("Env vars:", {
   <button
     onClick={() => {
       localStorage.removeItem("merchantToken");
+      localStorage.removeItem("your_wallet_address");
+      localStorage.removeItem("merchant_id")
+      axios.defaults.headers.common["Authorization"] = "";
       window.location.href = "/";
     }}
     style={{
@@ -363,8 +448,6 @@ console.log("Env vars:", {
       maxHeight: 60,
       marginTop: "10px",
       minWidth: 120,
-  
-      
       fontWeight: "bold",
     }}
   >
@@ -397,10 +480,11 @@ console.log("Env vars:", {
               {[
                 { title: "View Transactions", icon: <DollarOutlined /> },
                 { title: "View Orders", icon: <ShopOutlined /> },
-                { title: "Analytics", icon: <UserOutlined /> },
+                { key: "view-wallet", title: "View Wallet Address", icon: <UserOutlined /> },
               ].map((card) => (
                   <div
-                   key={card.title}
+                   key={card.key || card.title}
+                   onClick={() => handleCardClick(card.key)}
                    className="shadow-lg rounded-lg p-6 bg-white/10 backdrop-blur-md border border-white/20 cursor-pointer hover:bg-green-700 transition-colors flex items-center space-x-4"
                    style={{ color: "black",  flex: "0 0 250px",   height: 150, }}
                  >
@@ -419,6 +503,24 @@ console.log("Env vars:", {
                 </div>
               ))}
             </div>
+             {/* Wallet address display */}
+        <div style={{ marginTop: 10, marginLeft: 150, display: "flex", alignItems: "flex-start", backgroundColor: "rgba(255,255,255,0.05)", padding: 20, borderRadius: 8, boxShadow: "0 2px 6px rgba(0,0,0,0.5)" }}>
+        <span style={{ fontFamily: "monospace", fontWeight: "bold",fontSize: 16, marginTop: 10, }}>Copy Address:</span>
+<div
+  style={{
+  
+    minHeight: 80,
+    minWidth: 160,
+    marginLeft: 10,
+    display: "flex",
+    fontFamily: "monospace",
+    fontWeight: "bold",
+    fontSize: 16,
+  }}
+>
+  <WalletAddressWithCopy address={savedWalletAddress} />
+</div>
+      </div>
 
             {/* Right: Add Product button */}
             <Button
@@ -545,11 +647,13 @@ console.log("Env vars:", {
 
 <WalletSetupModal
   visible={walletModalVisible}
+  merchant_id={merchant_id}
   onClose={() => setWalletModalVisible(false)}
   onSubmit={(address) => {
     setSavedWalletAddress(address);
     message.success("Wallet saved successfully!");
     setWalletModalVisible(false);
+    localStorage.setItem('your_wallet_address', address);
     console.log("Saved wallet:", address); 
   }}
 />
