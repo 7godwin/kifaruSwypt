@@ -20,7 +20,7 @@ const WalletSetupModal = ({ visible, onClose, onSubmit, merchant_id }) => {
     }
 
     try {
-      await axios.post("http://localhost:5050/savewallet", {
+      await axios.post("https://kifaruswypt.onrender.com/savewallet", {
         wallet_address,
         merchant_id,
       });

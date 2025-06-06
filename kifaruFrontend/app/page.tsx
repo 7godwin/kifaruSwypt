@@ -508,6 +508,19 @@ const KifaruBeautyStore: React.FC = () => {
   const router = useRouter();
 
 const [products, setProducts] = useState<Product[]>([]);
+interface ClickedProduct {
+  id: number;
+  name: string;
+}
+
+const [whichproducts, setWhichProducts] = useState<ClickedProduct[]>([]);
+
+// setWhichProducts((prev) => {
+//   const exists = prev.some((p) => p.id === products.id);
+//   if (exists) return prev;   
+//   return [...prev, { id: products.id, name: products.name }];
+// });
+
 
 useEffect(() => {
   const fetchProducts = async () => {
