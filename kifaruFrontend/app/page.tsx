@@ -188,6 +188,9 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             KES {item.product.price.toLocaleString()}
                           </p>
                           <span className="inline-block text-xs text-gray-500 bg-white px-2 py-1 rounded-full mt-1">
+                            {item.product.quantity}
+                          </span>
+                          <span className="inline-block text-xs text-gray-500 bg-white px-2 py-1 rounded-full mt-1">
                             {item.product.category}
                           </span>
                         </div>
@@ -365,6 +368,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, isSelected 
           </span>
         )}
       </div>
+      <div className="absolute top-3 left-1">
+       <span className={`inline-block text-xs px-1 py-1 rounded-full mt-1 ${product.quantity > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+        {product.quantity} in stock
+        </span>
+       </div>
       <div className="absolute top-3 right-3">
         <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold shadow-sm">
           {product.category}
