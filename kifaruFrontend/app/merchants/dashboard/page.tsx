@@ -26,8 +26,9 @@ import {
   CopyOutlined
 } from "@ant-design/icons";
 
-import WalletSetupModal from "../../utilis/WalletSetupModal"; // Adjust the import path as necessary
-import WalletAddressWithCopy from "../../utilis/walletCopy"; // Adjust the import path as necessary
+import WalletSetupModal from "../../utilis/WalletSetupModal"; 
+import WalletAddressWithCopy from "../../utilis/walletCopy"; 
+import { log } from "console";
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 
@@ -58,13 +59,13 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
 
 
   const fetchWalletAddress = async () => {
-    const token = localStorage.getItem('token'); // Or whatever key you're storing the token under
+    const token = localStorage.getItem('token'); 
 
     try {
       const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // If your API uses auth
+          Authorization: `Bearer ${token}` 
         },
       });
 
@@ -91,7 +92,6 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
   if (e.key === "my Wallet") {
     setWalletModalVisible(true);
   }
-  // else handle other menu clicks...
 };
 
   const resetForm = () => {
@@ -103,23 +103,24 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
     setModalVisible(true);
   };
 
-  // axios save products to backend
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchmyProducts = async () => {
+   
       try {
-        const response = await axios.post("http://localhost:5050/AddProduct");
-        setProducts(response.data);
+        const id = localStorage.getItem('merchant_id')
+        const response = await axios.get(`http://localhost:5050/getMerchantProducts/${id}`);
+
+        setProducts(response.data.data);
       } catch (error) {
         console.error("Error fetching products:", error);
         message.error("Failed to load products.");
       }
     };
 
-    fetchProducts();
+    fetchmyProducts();
   }, []);
 
-
-
+ 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -223,7 +224,7 @@ console.log("Env vars:", {
     console.log("Cloudinary response:", result);
     console.log("Image URL:", imageUrl);
 
-    // Step 2: Send product info with imageUrl to your backend
+    // Step 2: Send product info with imageUrl to  backend
     const productPayload = {
       merchant_id,
       name,
@@ -241,7 +242,6 @@ console.log("Env vars:", {
 
     message.success("Product added successfully!");
     console.log("Server response:", response.data);
-
     setModalVisible(false);
     setForm({
       name: "",
@@ -250,6 +250,7 @@ console.log("Env vars:", {
       imageFile: null,
       imagePreview: "",
     });
+    fetchmyProducts();
   } catch (err) {
     if (err?.response) {
       message.error(`Server error: ${err.response.data.message || "Unknown error"}`);
@@ -260,17 +261,51 @@ console.log("Env vars:", {
   }
 };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Delete this product?")) {
+  const fetchmyProducts = async () => {
+   
+      try {
+        const id = localStorage.getItem('merchant_id')
+        const response = await axios.get(`http://localhost:5050/getMerchantProducts/${id}`);
+
+        setProducts(response.data.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        message.error("Failed to load products.");
+      }
+    };
+
+  // const handleDelete = (id: number) => {
+  //   if (confirm("Delete this product?")) {
+  //     setProducts((prev) => prev.filter((p) => p.id !== id));
+  //   }
+  // };
+
+  const handleDelete = async (id: number) => {
+  if (!confirm("Delete this product?")) return;
+
+  try {
+    await axios.delete(`http://localhost:5050/deleteProduct/${id}`);
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    message.success("Product deleted successfully.");
+  } catch (error) {
+    console.error("Failed to delete product:", error);
+    message.error("Failed to delete product.");
+  }
+};
+
+
+   const handleEdit = (id: number) => {
+    if (confirm("Edit this product?")) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     }
   };
 
+
   const columns = [
     {
       title: "Image",
-      dataIndex: "imageUrl",
-      key: "imageUrl",
+      dataIndex: "imageurl",
+      key: "imageurl",
       render: (url: string) => (
         <img src={url} alt="product" style={{ height: 50, borderRadius: 6 }} />
       ),
@@ -284,7 +319,12 @@ console.log("Env vars:", {
       title: "Price",
       dataIndex: "price",
       key: "price",
-      render: (price: number) => `$${price.toFixed(2)}`,
+      // render: (price: number) => `$${price.toFixed(2)}`,
+      render: (price: any) => {
+      const num = Number(price);
+       return isNaN(num) ? "$0.00" : `$${num.toFixed(2)}`;
+}
+
     },
     {
       title: "Quantity",
@@ -295,11 +335,21 @@ console.log("Env vars:", {
       title: "Actions",
       key: "actions",
       render: (_: any, record: Product) => (
+        <Button type="primary" onClick={() => handleEdit(record.id)}>
+          Edit
+        </Button>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: Product) => (
         <Button danger onClick={() => handleDelete(record.id)}>
           Delete
         </Button>
       ),
     },
+    
   ];
 
 
@@ -361,7 +411,6 @@ console.log("Env vars:", {
     }
   }
 
-  // handle other menu keys if needed
 };
 
   
@@ -657,10 +706,6 @@ console.log("Env vars:", {
     console.log("Saved wallet:", address); 
   }}
 />
-
-
-
-
         </Content>
       </Layout>
     </Layout>

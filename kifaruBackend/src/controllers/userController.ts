@@ -101,6 +101,35 @@ export const getProducts = async (req: Request, res: Response) => {
         }
 };
 
+
+export const getProductsByMerchantID = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "Merchant ID is required." });
+    }
+
+    const query = `SELECT * FROM Products WHERE merchant_id = $1`;
+    const values = [id];
+    const result = await sqlConfig.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No products found for this merchant." });
+    }
+
+    return res.status(200).json({
+      message: "Products retrieved successfully.",
+      data: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error getting your products:", error);
+    return res.status(500).json({ error: "An error occurred while retrieving products." });
+  }
+};
+
+
 //...............update Product by id...........................
 export const updateProduct = async (req: Request, res: Response) => {
     try {
