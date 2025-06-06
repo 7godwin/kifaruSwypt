@@ -33,7 +33,7 @@ const SignupPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await axios.post("http://localhost:5050/signup", {
+      const res = await axios.post("https://kifaruswypt.onrender.com/signup", {
         merchantUserName,
         merchantEmail,
         password,

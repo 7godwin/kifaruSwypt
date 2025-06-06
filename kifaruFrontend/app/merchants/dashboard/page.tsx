@@ -62,7 +62,7 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
     const token = localStorage.getItem('token'); 
 
     try {
-      const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
+      const response = await axios.get(`https://kifaruswypt.onrender.com/getWallet/${merchant_id}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}` 
@@ -108,7 +108,7 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
    
       try {
         const id = localStorage.getItem('merchant_id')
-        const response = await axios.get(`http://localhost:5050/getMerchantProducts/${id}`);
+        const response = await axios.get(`https://kifaruswypt.onrender.com/getMerchantProducts/${id}`);
 
         setProducts(response.data.data);
       } catch (error) {
@@ -234,7 +234,7 @@ console.log("Env vars:", {
       walletAddressed
     };
 
-    const response = await axios.post("http://localhost:5050/AddProduct", productPayload, {
+    const response = await axios.post("https://kifaruswypt.onrender.com/AddProduct", productPayload, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -265,7 +265,7 @@ console.log("Env vars:", {
    
       try {
         const id = localStorage.getItem('merchant_id')
-        const response = await axios.get(`http://localhost:5050/getMerchantProducts/${id}`);
+        const response = await axios.get(`https://kifaruswypt.onrender.com/getMerchantProducts/${id}`);
 
         setProducts(response.data.data);
       } catch (error) {
@@ -284,7 +284,7 @@ console.log("Env vars:", {
   if (!confirm("Delete this product?")) return;
 
   try {
-    await axios.delete(`http://localhost:5050/deleteProduct/${id}`);
+    await axios.delete(`https://kifaruswypt.onrender.com/deleteProduct/${id}`);
     setProducts((prev) => prev.filter((p) => p.id !== id));
     message.success("Product deleted successfully.");
   } catch (error) {
@@ -380,7 +380,7 @@ console.log("Env vars:", {
     console.log('Wallet menu clicked');
 
     try {
-      const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
+      const response = await axios.get(`https://kifaruswypt.onrender.com/getWallet/${merchant_id}`, {
         headers: { "Content-Type": "application/json" },
       });
 

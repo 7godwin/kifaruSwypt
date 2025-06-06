@@ -32,7 +32,7 @@ const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await axios.post("http://localhost:5050/auth/login", { merchantEmail, password });
+      const res = await axios.post("https://kifaruswypt.onrender.com/auth/login", { merchantEmail, password });
 
       if (res?.data?.message) {
         openNotification(res.data.message, "success");
@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
       const merchant_id = localStorage.getItem('merchant_id')
   
       try {
-        const response = await axios.get(`http://localhost:5050/getWallet/${merchant_id}`, {
+        const response = await axios.get(`https://kifaruswypt.onrender.com/getWallet/${merchant_id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}` // If your API uses auth

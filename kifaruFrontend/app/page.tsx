@@ -512,7 +512,7 @@ const [products, setProducts] = useState<Product[]>([]);
 useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:5050/getProducts");
+      const response = await axios.get("https://kifaruswypt.onrender.com/getProducts");
       setProducts(response.data.message);
       console.log("Products fetched:", response.data);
       const merchantAddress = response.data.message[0].walletaddressed;
