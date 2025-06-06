@@ -92,7 +92,7 @@ const LoginPage: React.FC = () => {
               type="email"
               id="merchantEmail"
               name="merchantEmail"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              className="text-black mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
               placeholder="Enter your merchant email"
               required
             />
@@ -103,7 +103,7 @@ const LoginPage: React.FC = () => {
               type="password"
               id="password"
               name="password"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              className="text-black mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
               placeholder="Enter your password"
               required
             />
