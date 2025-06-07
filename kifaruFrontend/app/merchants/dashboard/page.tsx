@@ -17,6 +17,7 @@ import {
   Row,
   Col,
   Typography,
+  Form,
 } from "antd";
 import {
   UploadOutlined,
@@ -33,7 +34,7 @@ const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 
 type Product = {
-  id: number;
+  id: number | string;
   name: string;
   price: number;
   quantity: number;
@@ -57,6 +58,7 @@ const [merchant_id, setMerchantId] = useState("0 merchant_id");
     imagePreview: "",
   });
 
+const [antForm] = Form.useForm();
 
   const fetchWalletAddress = async () => {
     const token = localStorage.getItem('token'); 
@@ -280,7 +282,7 @@ console.log("Env vars:", {
   //   }
   // };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number | string) => {
   if (!confirm("Delete this product?")) return;
 
   try {
@@ -294,9 +296,38 @@ console.log("Env vars:", {
 };
 
 
-   const handleEdit = (id: number) => {
-    if (confirm("Edit this product?")) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+  //  const handleEdit = (id: number) => {
+  //   if (confirm("Edit this product?")) {
+  //     setProducts((prev) => prev.filter((p) => p.id !== id));
+  //   }
+  // };
+
+  
+  const handleEdit = (id: number | string) => {
+    if (confirm('Edit this product?')) {
+      const product = products.find((p) => p.id === id);
+      if (!product) {
+        message.error('Product not found');
+        return;
+      }
+      // setEditingProduct(product);
+      setForm({
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+        imageFile: null,
+        imagePreview: product.imageUrl,
+      });
+      antForm.setFieldsValue({
+        id: product.id,
+        name: product.name,
+        // description: product.description,
+        price: product.price,
+        // category: product.category,
+        quantity: product.quantity,
+        imageUrl: product.imageUrl,
+      });
+      setModalVisible(true);
     }
   };
 
