@@ -1,0 +1,18 @@
+# Ignore node_modules and local dev artifacts
+node_modules
+.next
+dist
+build
+.env
+.env.local
+*.log
+.git
+.gitignore
+Dockerfile
+.dockerignore
+.vscode
+*.md
+*.zip
+*.tar.gz
+coverage
+public/uploads
