@@ -26,10 +26,10 @@ export const loginUser = async (req: Request, res: Response) => {
             return res.status(401).json({ error: "Incorrect password" });
         }
 
-        // Prepare payload for JWT (excluding password)
+        //Prepare payload for JWT (excluding password)
         const { password: ignoreThis, ...loginCredentials } = user;
 
-        // Generate JWT token
+        //Generate JWT token
         const token = jwt.sign(loginCredentials, SECRET, { expiresIn: '3600s' });
 
         return res.status(200).json({
