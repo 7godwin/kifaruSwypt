@@ -1,7 +1,6 @@
-import mssql from 'mssql'
-import { sqlConfig } from '../sqlConfig/sqlConfig'
+import { sqlConfig } from '../sqlConfig/sqlconfig'
 import ejs from 'ejs'
-import { sendMail } from '../helpers/emailHelpers'
+import { sendMail } from '../helpers/emailHelppers'
 
 // dotenv.config()  
 // import dotenv from 'dotenv'
