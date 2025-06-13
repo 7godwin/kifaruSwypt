@@ -6,25 +6,25 @@ import { sendMail } from '../helpers/emailHelppers'
 // import dotenv from 'dotenv'
 
 export const welcomeUser = async () => {
-    const pool = await mssql.connect(sqlConfig)
+    const pool = await sqlConfig.connect()
 
-    const users = (await pool.request().execute("WELCOMEUSER")).recordset
-
+ const result = await pool.query('SELECT * FROM WELCOMEUSER()')
+        const users = result.rows
     console.log(users);
 
     for (let user of users) {
         ejs.renderFile('templates/welcome.ejs', { firstName: user.firstName }, async (error, data) => {
             let mailOptions = {
-                from: "compgodwin@gmail.com",
+                from: "daogodwin@gmail.com",
                 to: user.email,
-                subject: "Welcome to TUUZE",
+                subject: "Welcome to Kifaru",
                 html: data
             }
 
             try {
                 await sendMail(mailOptions)
 
-                await pool.request().query('UPDATE Users SET isWelcomed = 1 WHERE isWelcomed = 0 AND isDeleted = 0')
+                await pool.query('UPDATE Users SET isWelcomed = 1 WHERE isWelcomed = 0 AND isDeleted = 0')
 
                 console.log("Emails sent to new users");
 
