@@ -11,7 +11,6 @@ export const welcomeUser = async () => {
  const result = await pool.query('SELECT * FROM WELCOMEUSER()')
         const users = result.rows
     console.log(users);
-
     for (let user of users) {
         ejs.renderFile('templates/welcome.ejs', { firstName: user.firstName }, async (error, data) => {
             let mailOptions = {
@@ -23,11 +22,8 @@ export const welcomeUser = async () => {
 
             try {
                 await sendMail(mailOptions)
-
                 await pool.query('UPDATE Users SET isWelcomed = 1 WHERE isWelcomed = 0 AND isDeleted = 0')
-
                 console.log("Emails sent to new users");
-
             } catch (error) {
                 console.log(error);
 
