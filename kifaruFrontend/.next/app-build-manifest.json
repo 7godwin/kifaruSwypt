@@ -12,25 +12,10 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/merchants/signUp/page": [
+    "/deliveryInfo/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/merchants/signUp/page.js"
-    ],
-    "/merchants/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/merchants/layout.js"
-    ],
-    "/merchants/login/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/merchants/login/page.js"
-    ],
-    "/merchants/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/merchants/dashboard/page.js"
+      "static/chunks/app/deliveryInfo/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",

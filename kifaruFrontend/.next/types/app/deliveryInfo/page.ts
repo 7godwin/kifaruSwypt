@@ -1,8 +1,8 @@
-// File: C:\Users\User\Desktop\SUI\KifaruSwypt\kifaruFrontend\app\merchants\dashboard\page.tsx
-import * as entry from '../../../../../app/merchants/dashboard/page.js'
+// File: C:\Users\User\Documents\7myProj\Team-projects\KifaruSwypt\kifaruFrontend\app\deliveryInfo\page.tsx
+import * as entry from '../../../../app/deliveryInfo/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../app/merchants/dashboard/page.js')
+type TEntry = typeof import('../../../../app/deliveryInfo/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

@@ -1,4 +1,4 @@
-// File: C:\Users\User\Desktop\SUI\KifaruSwypt\kifaruFrontend\app\layout.tsx
+// File: C:\Users\User\Documents\7myProj\Team-projects\KifaruSwypt\kifaruFrontend\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

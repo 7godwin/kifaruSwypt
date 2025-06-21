@@ -63,58 +63,6 @@ interface CategoryFilterProps {
 }
 
 
-
-// const beautyProducts: Product[] = [
-//   {
-//     id: "glow-serum",
-//     name: "Radiance Boost Vitamin C Serum",
-//     description: "Wake up to brighter skin! This potent serum is like sunshine in a bottle - packed with 20% vitamin C and hyaluronic acid for that dewy, camera-ready glow.",
-//     imageUrl: "/beauty-serum.jpg",
-//     price: 2850,
-//     category: "Skincare",
-//     rating: 4.8,
-//     bestseller: true
-//   },
-//   {
-//     id: "hydra-moisturizer",
-//     name: "Cloud Nine Hydrating Moisturizer",
-//     description: "Feels like a cool drink for thirsty skin! Our cult-favorite moisturizer melts in instantly, leaving skin baby-soft and plump for 24 hours straight.",
-//     imageUrl: "/moisturizer.jpg",
-//     price: 1,
-//     category: "Skincare",
-//     rating: 4.9
-//   },
-//   {
-//     id: "gentle-cleanser",
-//     name: "Bamboo Fresh Daily Cleanser",
-//     description: "Cleanse without the squeeze! This creamy, pH-balanced cleanser removes makeup and grime while keeping your skin barrier happy and hydrated.",
-//     imageUrl: "/cleanser.jpg",
-//     price: 2300,
-//     category: "Skincare",
-//     rating: 4.6
-//   },
-//   {
-//     id: "velvet-lipstick",
-//     name: "Velvet Kiss Liquid Lipstick",
-//     description: "One swipe, all-day confidence! This weightless liquid lipstick glides on like silk and stays put through coffee dates, work calls, and everything in between.",
-//     imageUrl: "/lipstick.jpg",
-//     price: 1950,
-//     category: "Makeup",
-//     rating: 4.7,
-//     new: true
-//   },
-//   {
-//     id: "flawless-foundation",
-//     name: "Second Skin Foundation",
-//     description: "Your skin, but better! This buildable foundation blurs imperfections while looking completely natural - like you woke up with perfect skin.",
-//     imageUrl: "/foundation.jpg",
-//     price: 3650,
-//     category: "Makeup",
-//     rating: 4.8,
-//     bestseller: true
-//   }
-// ];
-
 const CartPanel: React.FC<CartPanelProps> = ({
   isOpen,
   onClose,
